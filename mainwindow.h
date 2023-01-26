@@ -5,8 +5,9 @@
 #include <QSortFilterProxyModel>
 
 
-#include "CustomTreeModel.h"
+//#include "CustomTreeModel.h"
 //#include "CustomTreeModel2.h"
+#include "cbrnview.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -24,6 +25,8 @@ private:
     Ui::MainWindow *ui;
 
     //TreeModel* model;
-    CustomTreeModel *model;
+    //CustomTreeModel *model;
+
+    CBRNView *CBRNClass;
 };
 #endif // MAINWINDOW_H

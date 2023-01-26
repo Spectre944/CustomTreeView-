@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->treeView->setModel(model);
 */
 
+/*
 
     model = new CustomTreeModel();
     model->setRootPath("C://CBRN//Incoming");
@@ -39,7 +40,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui->treeView->resizeColumnToContents(0);
     ui->treeView->setRootIndex(model->index("C://CBRN//Incoming"));
 
+*/
 
+    CBRNClass = new CBRNView(this, "C://CBRN//Incoming", 0);
+
+    ui->treeView->setModel(CBRNClass->_model);
 
 }
 

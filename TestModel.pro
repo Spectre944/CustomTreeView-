@@ -15,6 +15,7 @@ SOURCES += \
 HEADERS += \
     CustomTreeModel.h \
     CustomTreeModel2.h \
+    cbrnview.h \
     mainwindow.h
 
 FORMS += \
