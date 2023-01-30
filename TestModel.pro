@@ -13,10 +13,10 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
-    CustomTreeModel.h \
-    CustomTreeModel2.h \
     cbrnview.h \
-    mainwindow.h
+    mainwindow.h \
+    tablemodel.h \
+    treemodel.h
 
 FORMS += \
     mainwindow.ui

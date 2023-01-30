@@ -7,21 +7,26 @@
 #include <QAbstractItemModel>
 #include <QModelIndex>
 
-#include "CustomTreeModel2.h"
+#include "treemodel.h"
+#include "tablemodel.h"
 
 class CBRNView : public QObject
 {
     Q_OBJECT
 public:
-    explicit CBRNView(QObject *parent = nullptr, QString path = 0, int typeSorting = 0);
+    explicit CBRNView(QObject *parent = nullptr, QString path = 0);
     QList<QString> readToStringList(QString path);
-    TreeModel getModel()    {
-        return _model;
+    TreeModel * getTreeModel()    {
+        return _treeModel;
+    }
+    TableModel * getTableModel(){
+        return _tableModel;
     }
 
 
     QList<QString> _fileNames;
-    TreeModel* _model;
+    TreeModel* _treeModel;
+    TableModel * _tableModel;
 
 private:
 
@@ -33,37 +38,22 @@ signals:
 
 };
 
-inline CBRNView::CBRNView(QObject *parent, QString path, int typeSorting)
+inline CBRNView::CBRNView(QObject *parent, QString path)
 {
+    Q_UNUSED(parent);
+
     //read all file name from folder
     _fileNames.clear();
     _fileNames = readToStringList(path);
 
-   _model = new TreeModel();
+   _treeModel = new TreeModel(_fileNames);
 
-    QStringList cols;
+   _tableModel = new TableModel(_fileNames.count(), 10, _fileNames);
 
-    switch (typeSorting) {
-        //CBRN by number
-        case 0:      cols << "CBRN" << "Тип" << "Кількість";    break;
+   _tableModel->updateModel(_fileNames);
 
-        //CBRN by type
-        case 1:      cols << "Тип" << "CBRN" << "Кількість";   break;
 
-    }
 
-    _model->setColumns(cols);
-
-    QObject* item1 = new QObject();
-    item1->setObjectName("Father");
-
-    QObject* item2 = new QObject(item1);
-    item2->setProperty("CBRN", "CBRN1");
-
-    QObject* item3 = new QObject(item2);
-    item3->setProperty("Тип", "NUC");
-
-    _model->addItem(item1, QModelIndex());
 
 }
 
@@ -78,6 +68,8 @@ inline QList<QString> CBRNView::readToStringList(QString path)
 
         fileNames.append(filename);
     }
+
+    fileNames.sort();
 
     return fileNames;
 }

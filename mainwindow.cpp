@@ -42,14 +42,66 @@ MainWindow::MainWindow(QWidget *parent)
 
 */
 
-    CBRNClass = new CBRNView(this, "C://CBRN//Incoming", 0);
+    CBRNClass = new CBRNView(this, "C://CBRN//Incoming");
 
-    ui->treeView->setModel(CBRNClass->_model);
+
+
+    ui->treeView->setModel(CBRNClass->getTreeModel());
+
+    ui->tableView->setModel(CBRNClass->getTableModel());
+    ui->tableView->resizeColumnsToContents();
+
+
 
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+
+void MainWindow::on_tableView_clicked(const QModelIndex &index)
+{
+    QFile CBRN;
+    CBRN.setFileName("C:\\CBRN\\Incoming\\" + CBRNClass->getTableModel()->data(index, Qt::DisplayRole).toString());
+
+    CBRN.open(QIODevice::ReadOnly);
+    QString cbrnContent = QLatin1String(CBRN.readAll());
+    CBRN.close();
+
+    ui->textEdit->clear();
+    ui->textEdit->setPlainText(cbrnContent);
+
+
+    qDebug() << CBRNClass->getTableModel()->data(index, Qt::DisplayRole);
+    qDebug() << index;
+}
+
+
+void MainWindow::on_treeView_clicked(const QModelIndex &index)
+{
+
+    ui->tableView->resizeColumnsToContents();
+
+    QString filter;
+    QStringList filteredList;
+
+    filter.append(CBRNClass->getTreeModel()->parent(index).data(Qt::DisplayRole).toString());
+    if(!filter.isEmpty())
+        filter.append(" ");
+    filter.append(CBRNClass->getTreeModel()->data(index, Qt::DisplayRole).toString());
+
+
+    qDebug() << CBRNClass->getTreeModel()->parent(index).data(Qt::DisplayRole);
+    qDebug() << CBRNClass->getTreeModel()->data(index, Qt::DisplayRole);
+    qDebug() << filter;
+
+    filteredList = CBRNClass->_fileNames.filter(filter);
+
+    //CBRNClass->getTableModel()->removeRows(0,12,QModelIndex());
+
+    CBRNClass->getTableModel()->updateModel(filteredList);
+
 }
 
