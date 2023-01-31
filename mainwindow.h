@@ -26,6 +26,8 @@ private slots:
 
     void on_treeView_clicked(const QModelIndex &index);
 
+    void on_treeView_customContextMenuRequested(const QPoint &pos);
+
 private:
     Ui::MainWindow *ui;
 

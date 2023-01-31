@@ -16,7 +16,11 @@ public:
     virtual QVariant data(const QModelIndex &index, int role) const;
     virtual Qt::ItemFlags flags(const QModelIndex &index) const;
     virtual bool setData(const QModelIndex &index, const QVariant &value, int role);
-    virtual bool removeRows(int row, int count, const QModelIndex &parent);
+    virtual bool removeRows(int position, int rows, const QModelIndex &index);
+    virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    virtual bool setHeaderData(Qt::Orientation orientation, const QList<QVariant> &value, int role);
+    bool insertRowData(int row, const QList<QVariant> &value, const QModelIndex &index);
+
 
 
     void updateModel(const QList<QString> &data);
@@ -26,17 +30,27 @@ private:
 
     int _rowCount = 0;
     int _colCount = 0;
+    QList<QVariant> headerNames;
 
 
 protected:
     QHash<QModelIndex, QVariant> _cellData;
 
+
+
+    // QAbstractItemModel interface
+public:
+
+
+    // QAbstractItemModel interface
+public:
+    virtual bool insertRows(int row, int count, const QModelIndex &parent);
 };
 
 inline TableModel::TableModel(int row, int col,const QList<QString> &data, QObject *parent)
     : QAbstractTableModel(parent), _rowCount(row), _colCount(col)
 {
-
+     Q_UNUSED(data);
 }
 
 inline int TableModel::rowCount(const QModelIndex &parent) const
@@ -91,8 +105,19 @@ inline void TableModel::updateModel(const QList<QString> &data)
     QStringList result;
     QFile cbrnFile;
     QString cbrnRow = 0;
-    while (number < data.count()) {
+    QList<QVariant> headers;
 
+    //ALPHA, DELTA, FOXTROT, GOLF, HOTEL, INDIA, INDIAR, INDIAB, INDIAC,
+    headers << "Файл" << "ALPHA" << "DELTA" << "FOXTROT" << "GOLF" << "HOTEL" << "INDIA" << "INDIAR" << "INDIAB" << "INDIAC";
+    setHeaderData(Qt::Horizontal, headers, Qt::EditRole);
+
+
+    //remove all rows before update
+    removeRows(0, rowCount(QModelIndex()),QModelIndex());
+
+    insertRows(0,data.count(),QModelIndex());
+
+    while (number < data.count()) {
 
         //Копируем нумерованые элементы в отдельную строку и работаеми с ними
         const QString lineData = data[number];
@@ -114,19 +139,18 @@ inline void TableModel::updateModel(const QList<QString> &data)
             cbrnFile.open(QIODevice::ReadOnly);
             cbrnContent = QLatin1String(cbrnFile.readAll());
             cbrnFile.close();
-            const QStringList columnStrings = cbrnContent.split(QLatin1Char('\n'), Qt::SkipEmptyParts);
+            const QStringList columnStrings = cbrnContent.split(QLatin1Char('\n'), Qt::SkipEmptyParts);                  
 
+            QList<QVariant> witeData;
 
-            setData(index(number, 0), data[number], Qt::DisplayRole);
-
-            //ALPHA, DELTA, FOXTROT, GOLF, HOTEL, INDIA, INDIAR, INDIAB, INDIAC,
+            witeData << data[number];
 
             cbrnRow = "ALPHA/";
             result = columnStrings.filter(cbrnRow);
             if(!result.isEmpty()){
                 QString cutInfo = result[0].remove(cbrnRow);
                 cutInfo.remove(QString("//"));
-                setData(index(number, 1), cutInfo, Qt::DisplayRole);
+                witeData << cutInfo;
             }
 
             cbrnRow = "DELTA/";
@@ -135,7 +159,7 @@ inline void TableModel::updateModel(const QList<QString> &data)
                 QString cutInfo = result[0];
                 cutInfo.remove(cbrnRow);
                 cutInfo.remove(QString("//"));
-                setData(index(number, 2), cutInfo, Qt::DisplayRole);
+                witeData << cutInfo;
             }
 
             cbrnRow = "FOXTROT/";
@@ -144,7 +168,7 @@ inline void TableModel::updateModel(const QList<QString> &data)
                 QString cutInfo = result[0];
                 cutInfo.remove(cbrnRow);
                 cutInfo.remove(QString("//"));
-                setData(index(number, 3), cutInfo, Qt::DisplayRole);
+                witeData << cutInfo;
             }
 
             cbrnRow = "GOLF/";
@@ -153,7 +177,7 @@ inline void TableModel::updateModel(const QList<QString> &data)
                 QString cutInfo = result[0];
                 cutInfo.remove(cbrnRow);
                 cutInfo.remove(QString("//"));
-                setData(index(number, 4), cutInfo, Qt::DisplayRole);
+                witeData << cutInfo;
             }
 
             cbrnRow = "HOTEL/";
@@ -162,7 +186,7 @@ inline void TableModel::updateModel(const QList<QString> &data)
                 QString cutInfo = result[0];
                 cutInfo.remove(cbrnRow);
                 cutInfo.remove(QString("//"));
-                setData(index(number, 5), cutInfo, Qt::DisplayRole);
+                witeData << cutInfo;
             }
 
             cbrnRow = "INDIA/";
@@ -171,7 +195,7 @@ inline void TableModel::updateModel(const QList<QString> &data)
                 QString cutInfo = result[0];
                 cutInfo.remove(cbrnRow);
                 cutInfo.remove(QString("//"));
-                setData(index(number, 6), cutInfo, Qt::DisplayRole);
+                witeData << cutInfo;
             }
 
             cbrnRow = "INDIAR/";
@@ -180,7 +204,7 @@ inline void TableModel::updateModel(const QList<QString> &data)
                 QString cutInfo = result[0];
                 cutInfo.remove(cbrnRow);
                 cutInfo.remove(QString("//"));
-                setData(index(number, 7), cutInfo, Qt::DisplayRole);
+                witeData << cutInfo;
             }
 
             cbrnRow = "INDIAB/";
@@ -189,7 +213,7 @@ inline void TableModel::updateModel(const QList<QString> &data)
                 QString cutInfo = result[0];
                 cutInfo.remove(cbrnRow);
                 cutInfo.remove(QString("//"));
-                setData(index(number, 8), cutInfo, Qt::DisplayRole);
+                witeData << cutInfo;
             }
 
             cbrnRow = "INDIAC/";
@@ -198,8 +222,95 @@ inline void TableModel::updateModel(const QList<QString> &data)
                 QString cutInfo = result[0];
                 cutInfo.remove(cbrnRow);
                 cutInfo.remove(QString("//"));
-                setData(index(number, 9), cutInfo, Qt::DisplayRole);
+                witeData << cutInfo;
             }
+
+            for(int i = 0; i < witeData.count(); i++)
+                setData(index(number,i),witeData.at(i),Qt::DisplayRole);
+
+            /*
+
+            cbrnRow = "ALPHA/";
+            result = columnStrings.filter(cbrnRow);
+            if(!result.isEmpty()){
+                QString cutInfo = result[0].remove(cbrnRow);
+                cutInfo.remove(QString("//"));
+                setData(index(number, 1), cutInfo, Qt::EditRole);
+            }
+
+            cbrnRow = "DELTA/";
+            result = columnStrings.filter(cbrnRow);
+            if(!result.isEmpty()){
+                QString cutInfo = result[0];
+                cutInfo.remove(cbrnRow);
+                cutInfo.remove(QString("//"));
+                setData(index(number, 2), cutInfo, Qt::EditRole);
+            }
+
+            cbrnRow = "FOXTROT/";
+            result = columnStrings.filter(cbrnRow);
+            if(!result.isEmpty()){
+                QString cutInfo = result[0];
+                cutInfo.remove(cbrnRow);
+                cutInfo.remove(QString("//"));
+                setData(index(number, 3), cutInfo, Qt::EditRole);
+            }
+
+            cbrnRow = "GOLF/";
+            result = columnStrings.filter(cbrnRow);
+            if(!result.isEmpty()){
+                QString cutInfo = result[0];
+                cutInfo.remove(cbrnRow);
+                cutInfo.remove(QString("//"));
+                setData(index(number, 4), cutInfo, Qt::EditRole);
+            }
+
+            cbrnRow = "HOTEL/";
+            result = columnStrings.filter(cbrnRow);
+            if(!result.isEmpty()){
+                QString cutInfo = result[0];
+                cutInfo.remove(cbrnRow);
+                cutInfo.remove(QString("//"));
+                setData(index(number, 5), cutInfo, Qt::EditRole);
+            }
+
+            cbrnRow = "INDIA/";
+            result = columnStrings.filter(cbrnRow);
+            if(!result.isEmpty()){
+                QString cutInfo = result[0];
+                cutInfo.remove(cbrnRow);
+                cutInfo.remove(QString("//"));
+                setData(index(number, 6), cutInfo, Qt::EditRole);
+            }
+
+            cbrnRow = "INDIAR/";
+            result = columnStrings.filter(cbrnRow);
+            if(!result.isEmpty()){
+                QString cutInfo = result[0];
+                cutInfo.remove(cbrnRow);
+                cutInfo.remove(QString("//"));
+                setData(index(number, 7), cutInfo, Qt::EditRole);
+            }
+
+            cbrnRow = "INDIAB/";
+            result = columnStrings.filter(cbrnRow);
+            if(!result.isEmpty()){
+                QString cutInfo = result[0];
+                cutInfo.remove(cbrnRow);
+                cutInfo.remove(QString("//"));
+                setData(index(number, 8), cutInfo, Qt::EditRole);
+            }
+
+            cbrnRow = "INDIAC/";
+            result = columnStrings.filter(cbrnRow);
+            if(!result.isEmpty()){
+                QString cutInfo = result[0];
+                cutInfo.remove(cbrnRow);
+                cutInfo.remove(QString("//"));
+                setData(index(number, 9), cutInfo, Qt::EditRole);
+            }
+
+            */
 
         }
 
@@ -209,24 +320,53 @@ inline void TableModel::updateModel(const QList<QString> &data)
 
 }
 
-inline bool TableModel::removeRows(int row, int count, const QModelIndex &parent)
+inline bool TableModel::insertRows(int row, int count, const QModelIndex &parent)
 {
-    beginRemoveRows(QModelIndex(), row, count);
+    Q_UNUSED(parent);
 
-//    for (int row = 0; row < _rowCount; ++row) {
-//        setData(index(row,0),"",Qt::DisplayRole);
-//        setData(index(row,1),"",Qt::DisplayRole);
-//        setData(index(row,2),"",Qt::DisplayRole);
-//        setData(index(row,3),"",Qt::DisplayRole);
-//        setData(index(row,4),"",Qt::DisplayRole);
-//        setData(index(row,5),"",Qt::DisplayRole);
-//        setData(index(row,6),"",Qt::DisplayRole);
-//        setData(index(row,7),"",Qt::DisplayRole);
-//        setData(index(row,8),"",Qt::DisplayRole);
-//        setData(index(row,9),"",Qt::DisplayRole);
-//    }
+    beginInsertRows(QModelIndex(), row, count - 1);
+
+    _rowCount = count;
+
+    endInsertRows();
+    return true;
+}
+
+inline QVariant TableModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role != Qt::DisplayRole)
+        return QVariant();
+
+    if(orientation == Qt::Horizontal){
+        if(!headerNames.at(section).isNull())
+            return headerNames.at(section);
+    }
+    else{
+        return section + 1;
+    }
+
+    return QVariant();
+
+}
+
+inline bool TableModel::setHeaderData(Qt::Orientation orientation, const QList<QVariant> &value, int role)
+{
+    Q_UNUSED(orientation);
+    Q_UNUSED(role);
+    //headerNames.clear();
+    headerNames << value;
+    return true;
+}
 
 
+inline bool TableModel::removeRows(int position, int rows, const QModelIndex &index)
+{
+
+    Q_UNUSED(index);
+
+    beginRemoveRows(QModelIndex(), position, rows - 1);
+
+    _rowCount = 0;
 
     endRemoveRows();
     return true;
