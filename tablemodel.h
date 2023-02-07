@@ -109,10 +109,16 @@ inline void TableModel::updateModel(const QList<QString> &data)
 
     _cellData.clear();
 
-    //remove all rows before update
-    removeRows(0, rowCount(QModelIndex()),QModelIndex());
 
-    insertRows(0,data.count(),QModelIndex());
+
+    //dont build model if empty
+    if(!data.isEmpty()){
+
+        //remove all rows before update
+        removeRows(0, rowCount(QModelIndex()),QModelIndex());
+        insertRows(0,data.count(),QModelIndex());
+    }
+
 
     while (number < data.count()) {
 

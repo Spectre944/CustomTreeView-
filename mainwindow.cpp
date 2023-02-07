@@ -76,3 +76,20 @@ void MainWindow::on_treeView_customContextMenuRequested(const QPoint &pos)
     CBRNClass->getTableModel()->updateModel(CBRNClass->_fileNames);
 }
 
+
+void MainWindow::on_pushButton_clicked()
+{
+
+    int pos = ui->comboBoxFR1_I01_ResistanceType_m->findText( ui->lineEdit->text(), Qt::MatchRegularExpression);
+    qDebug() << "MatchRegularExpression" << ui->comboBoxFR1_I01_ResistanceType_m->findText( ui->lineEdit->text(), Qt::MatchRegularExpression);
+    qDebug() << "MatchContains" << ui->comboBoxFR1_I01_ResistanceType_m->findText( ui->lineEdit->text(), Qt::MatchContains);
+    qDebug() << "MatchExactly" << ui->comboBoxFR1_I01_ResistanceType_m->findText( ui->lineEdit->text(), Qt::MatchExactly);
+    qDebug() << "MatchCaseSensitive" << ui->comboBoxFR1_I01_ResistanceType_m->findText( ui->lineEdit->text(), Qt::MatchCaseSensitive);
+    qDebug() << "MatchWildcard" << ui->comboBoxFR1_I01_ResistanceType_m->findText( ui->lineEdit->text(), Qt::MatchWildcard);
+    qDebug() << "MatchWrap" << ui->comboBoxFR1_I01_ResistanceType_m->findText( ui->lineEdit->text(), Qt::MatchWrap);
+    qDebug() << "MatchRecursive" << ui->comboBoxFR1_I01_ResistanceType_m->findText( ui->lineEdit->text(), Qt::MatchRecursive);
+
+    qDebug() << "Тип стійкості " << pos;
+    ui->comboBoxFR1_I01_ResistanceType_m->setCurrentIndex(pos);
+}
+

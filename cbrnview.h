@@ -53,8 +53,6 @@ inline CBRNView::CBRNView(QObject *parent, QString path)
    _tableModel->updateModel(_fileNames);
 
 
-
-
 }
 
 inline QList<QString> CBRNView::readToStringList(QString path)
