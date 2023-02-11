@@ -101,9 +101,11 @@ inline void TableModel::updateModel(const QList<QString> &data)
     QFile cbrnFile;
     QString cbrnRow = 0;
     QList<QVariant> headers;
+    QDateTime FileCreatedTime;
+
 
     //ALPHA, DELTA, FOXTROT, GOLF, HOTEL, INDIA, INDIAR, INDIAB, INDIAC,
-    headers << "Файл" << "ALPHA/" << "DELTA/" << "FOXTROT/" << "GOLF/" << "HOTEL/" << "INDIA/" << "INDIAR/" << "INDIAB/" << "INDIAC/";
+    headers << "Файл" << "Дата" << "ALPHA/" << "DELTA/" << "FOXTROT/" << "GOLF/" << "HOTEL/" << "INDIA/" << "INDIAR/" << "INDIAB/" << "INDIAC/";
     setHeaderData(Qt::Horizontal, headers, Qt::EditRole);
 
 
@@ -149,8 +151,29 @@ inline void TableModel::updateModel(const QList<QString> &data)
             //Имя файла нулевым столбцом
             witeData << data[number];
 
+            //Считываем имя файла с список
+            QStringList fileStringList =  data[number].split(" ");
+
+            //Проверяем не пуста ли строка с датой созлания файла
+            if(fileStringList.count() > 3){
+
+                QString time = fileStringList[3];
+                int secFromEpoc = time.split(".")[0].toInt();
+                FileCreatedTime.setSecsSinceEpoch( secFromEpoc );
+
+            }
+            else{
+                FileCreatedTime.setSecsSinceEpoch( 0 );
+            }
+
+
+
+
+
+            witeData << FileCreatedTime;
+
             //Ищем строки, обрезаем и заполняем, если ничего не найдено в строке ставим NULL
-            for(int i = 1; i < headers.count(); i++){
+            for(int i = 2; i < headers.count(); i++){
 
                 cbrnRow = headers.at(i).toString();
                 result = columnStrings.filter(cbrnRow);
