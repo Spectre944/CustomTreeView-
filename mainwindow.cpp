@@ -91,5 +91,7 @@ void MainWindow::on_pushButton_clicked()
 
     qDebug() << "Тип стійкості " << pos;
     ui->comboBoxFR1_I01_ResistanceType_m->setCurrentIndex(pos);
+
+    CBRNClass->updateModels("C://CBRN//Incoming");
 }
 

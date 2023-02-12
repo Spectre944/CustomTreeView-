@@ -22,6 +22,7 @@ public:
     virtual QVariant data(int column) const;
     virtual int row() const;
     virtual TreeItem *parentItem();
+    bool removeChildren(int position, int count);
 
 private:
     QList<TreeItem *> m_childItems;
@@ -72,6 +73,19 @@ inline TreeItem *TreeItem::parentItem()
     return m_parentItem;
 }
 
+inline bool TreeItem::removeChildren(int position, int count)
+{
+    if (position < 0 || position > m_childItems.count())
+        return false;
+
+    for (int row = 0; row < count; ++row)
+    {
+        delete m_childItems.takeAt(position);
+    }
+
+    return true;
+}
+
 inline int TreeItem::row() const
 {
     if (m_parentItem)
@@ -97,6 +111,7 @@ public:
     virtual QModelIndex parent(const QModelIndex &index) const override;
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    virtual void updateModel(const QList<QString> &data, QObject *parent  = nullptr);
 
 private:
     virtual void setupModelData(const QStringList &lines, TreeItem *parent);
@@ -122,6 +137,17 @@ inline int TreeModel::columnCount(const QModelIndex &parent) const
     if (parent.isValid())
         return static_cast<TreeItem*>(parent.internalPointer())->columnCount();
     return rootItem->columnCount();
+}
+
+inline void TreeModel::updateModel(const QList<QString> &data, QObject *parent)
+{
+    beginResetModel();
+
+    //убираем все дочерние элементы и формируем новый список
+    rootItem->removeChildren(0, rootItem->childCount());
+    setupModelData(data, rootItem);
+
+    endResetModel();
 }
 
 inline QVariant TreeModel::data(const QModelIndex &index, int role) const

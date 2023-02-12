@@ -22,6 +22,7 @@ public:
     TableModel * getTableModel(){
         return _tableModel;
     }
+    void updateModels(QString);
 
 
     QList<QString> _fileNames;
@@ -48,7 +49,7 @@ inline CBRNView::CBRNView(QObject *parent, QString path)
 
    _treeModel = new TreeModel(_fileNames);
 
-   _tableModel = new TableModel(_fileNames.count(), 10, _fileNames);
+   _tableModel = new TableModel(_fileNames.count(), 11, _fileNames);
 
    _tableModel->updateModel(_fileNames);
 
@@ -70,6 +71,16 @@ inline QList<QString> CBRNView::readToStringList(QString path)
     fileNames.sort();
 
     return fileNames;
+}
+
+inline void CBRNView::updateModels(QString path)
+{
+    _fileNames.clear();
+    _fileNames = readToStringList(path);
+
+   _treeModel->updateModel(_fileNames);
+   _tableModel->updateModel(_fileNames);
+
 }
 
 #endif // CBRNVIEW_H
