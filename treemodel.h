@@ -12,7 +12,7 @@ class TreeItem
 {
 public:
     explicit TreeItem(const QList<QVariant> &data, TreeItem *parentItem = nullptr);
-    ~TreeItem();
+    virtual ~TreeItem();
 
     virtual void appendChild(TreeItem *child);
 
@@ -100,7 +100,7 @@ class TreeModel : public QAbstractItemModel
 
 public:
     explicit TreeModel(const QList<QString> &data, QObject *parent = nullptr);
-    ~TreeModel();
+    virtual ~TreeModel();
 
     virtual QVariant data(const QModelIndex &index, int role) const override;
     virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
@@ -111,10 +111,10 @@ public:
     virtual QModelIndex parent(const QModelIndex &index) const override;
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     virtual int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-    virtual void updateModel(const QList<QString> &data, QObject *parent  = nullptr);
+    virtual void updateCBRNModel(const QList<QString> &data, QObject *parent  = nullptr);
 
 private:
-    virtual void setupModelData(const QStringList &lines, TreeItem *parent);
+    void setupModelData(const QStringList &lines, TreeItem *parent);
 
     TreeItem *rootItem;
 };
@@ -123,8 +123,10 @@ private:
 inline TreeModel::TreeModel(const QList<QString> &data, QObject *parent)
     : QAbstractItemModel(parent)
 {
+    Q_UNUSED(parent);
+    Q_UNUSED(data);
+
     rootItem = new TreeItem({tr("CBRN"), tr("Кількість")});
-    setupModelData(data, rootItem);
 }
 
 inline TreeModel::~TreeModel()
@@ -139,8 +141,10 @@ inline int TreeModel::columnCount(const QModelIndex &parent) const
     return rootItem->columnCount();
 }
 
-inline void TreeModel::updateModel(const QList<QString> &data, QObject *parent)
+inline void TreeModel::updateCBRNModel(const QList<QString> &data, QObject *parent)
 {
+    Q_UNUSED(parent);
+
     beginResetModel();
 
     //убираем все дочерние элементы и формируем новый список

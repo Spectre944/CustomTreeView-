@@ -18,24 +18,24 @@ public:
     virtual QVariant data(const QModelIndex &index, int role) const;
     virtual Qt::ItemFlags flags(const QModelIndex &index) const;
     //virtual bool setData(const QModelIndex &index, const QVariant &value, int role);
-    inline bool setData(const QModelIndex &index, const QVariantList &value, int role);
     virtual bool removeRows(int position, int rows, const QModelIndex &index);
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-    virtual bool setHeaderData(Qt::Orientation orientation, const QList<QVariant> &value, int role);
     virtual void sort(int column, Qt::SortOrder order);
     virtual bool insertRows(int row, int count, const QModelIndex &parent);
+    using QAbstractTableModel::setData;
+    virtual bool setData(const QModelIndex &index, const QVariantList &value, int role);
+    using QAbstractTableModel::setHeaderData;
+    virtual bool setHeaderData(Qt::Orientation orientation, const QList<QVariant> &value, int role);
+
     bool insertRowData(int row, const QList<QVariant> &value, const QModelIndex &index);
-
-
-
-    void updateModel(const QList<QString> &data);
+    void updateCBRNModel(const QList<QString> &data);
 
 
 private:
 
     int _rowCount = 0;
     int _colCount = 0;
-    QList<QVariant> headerNames;
+    QVariantList headerNames;
 
 
 protected:
@@ -98,7 +98,7 @@ inline bool TableModel::setData(const QModelIndex &index, const QVariantList &va
 
 
 
-inline void TableModel::updateModel(const QList<QString> &data)
+inline void TableModel::updateCBRNModel(const QList<QString> &data)
 {
 
     int number = 0;
@@ -106,25 +106,18 @@ inline void TableModel::updateModel(const QList<QString> &data)
     QStringList result;
     QFile cbrnFile;
     QString cbrnRow = 0;
-    QList<QVariant> headers;
     QDateTime FileCreatedTime;
-
-
-    //ALPHA, DELTA, FOXTROT, GOLF, HOTEL, INDIA, INDIAR, INDIAB, INDIAC,
-    headers << "Файл" << "Дата" << "ALPHA/" << "DELTA/" << "FOXTROT/" << "GOLF/" << "HOTEL/" << "INDIA/" << "INDIAR/" << "INDIAB/" << "INDIAC/";
-    setHeaderData(Qt::Horizontal, headers, Qt::EditRole);
-
 
     _cellData.clear();
 
-
     //dont build model if empty
-    if(!data.isEmpty()){
-
-        //remove all rows before update
-        removeRows(0, rowCount(QModelIndex()),QModelIndex());
-        insertRows(0,data.count(),QModelIndex());
+    if(data.isEmpty()){
+        return;
     }
+
+    //remove all rows before update
+    removeRows(0, rowCount(QModelIndex()),QModelIndex());
+    insertRows(0,data.count(),QModelIndex());
 
 
 
@@ -172,16 +165,12 @@ inline void TableModel::updateModel(const QList<QString> &data)
                 FileCreatedTime.setSecsSinceEpoch( 0 );
             }
 
-
-
-
-
             witeData << FileCreatedTime;
 
             //Ищем строки, обрезаем и заполняем, если ничего не найдено в строке ставим NULL
-            for(int i = 2; i < headers.count(); i++){
+            for(int i = 2; i < headerNames.count(); i++){
 
-                cbrnRow = headers.at(i).toString();
+                cbrnRow = headerNames.at(i).toString();
                 result = columnStrings.filter(cbrnRow);
 
                 if(!result.isEmpty()){
@@ -197,10 +186,6 @@ inline void TableModel::updateModel(const QList<QString> &data)
 
             setData(index(number,0), witeData, Qt::DisplayRole);
 
-            //внесение данных
-            //for(int i = 0; i < witeData.count(); i++)
-                //setData(index(number,i),witeData.at(i),Qt::DisplayRole);
-
 
         }
 
@@ -212,6 +197,7 @@ inline void TableModel::updateModel(const QList<QString> &data)
 
 inline bool TableModel::insertRows(int row, int count, const QModelIndex &parent)
 {
+
     Q_UNUSED(parent);
 
     beginInsertRows(QModelIndex(), row, count - 1);
@@ -220,6 +206,7 @@ inline bool TableModel::insertRows(int row, int count, const QModelIndex &parent
 
     endInsertRows();
     return true;
+
 }
 
 inline void TableModel::sort(int column, Qt::SortOrder order)
@@ -232,7 +219,8 @@ inline void TableModel::sort(int column, Qt::SortOrder order)
 
         if(order == Qt::AscendingOrder)
             return aV==bV ?  a.at(2)<b.at(2) : aV<bV;
-            return aV==bV ? a.at(2)>b.at(2) : aV>bV;
+
+       return aV==bV ? a.at(2)>b.at(2) : aV>bV;
     });
 
     emit layoutChanged({QModelIndex()}, QAbstractItemModel::VerticalSortHint);
@@ -280,12 +268,6 @@ inline bool TableModel::removeRows(int position, int rows, const QModelIndex &in
     endRemoveRows();
     return true;
 }
-
-
-
-
-
-
 
 
 

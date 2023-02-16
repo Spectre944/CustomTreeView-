@@ -63,7 +63,7 @@ void MainWindow::on_treeView_clicked(const QModelIndex &index)
 
     filteredList = CBRNClass->_fileNames.filter(filter);
 
-    CBRNClass->getTableModel()->updateModel(filteredList);
+    CBRNClass->getTableModel()->updateCBRNModel(filteredList);
 
 }
 
@@ -73,7 +73,7 @@ void MainWindow::on_treeView_customContextMenuRequested(const QPoint &pos)
     Q_UNUSED(pos);
     //Очишаем весь фильтр и выводим все существующие файлы
     ui->tableView->resizeColumnsToContents();
-    CBRNClass->getTableModel()->updateModel(CBRNClass->_fileNames);
+    CBRNClass->getTableModel()->updateCBRNModel(CBRNClass->_fileNames);
 }
 
 

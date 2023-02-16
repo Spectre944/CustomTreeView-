@@ -48,10 +48,14 @@ inline CBRNView::CBRNView(QObject *parent, QString path)
     _fileNames = readToStringList(path);
 
    _treeModel = new TreeModel(_fileNames);
+   _treeModel->updateCBRNModel(_fileNames);
 
-   _tableModel = new TableModel(_fileNames.count(), 11, _fileNames);
+   //ALPHA, DELTA, FOXTROT, GOLF, HOTEL, INDIA, INDIAR, INDIAB, INDIAC,
+   QVariantList headers { "Файл", "Дата", "ALPHA/", "DELTA/", "FOXTROT/", "GOLF/", "HOTEL/", "INDIA/", "INDIAR/", "INDIAB/", "INDIAC/"};
 
-   _tableModel->updateModel(_fileNames);
+   _tableModel = new TableModel(_fileNames.count(), headers.count(), _fileNames);
+   _tableModel->setHeaderData(Qt::Horizontal ,headers, Qt::EditRole);
+   _tableModel->updateCBRNModel(_fileNames);
 
 
 }
@@ -78,8 +82,8 @@ inline void CBRNView::updateModels(QString path)
     _fileNames.clear();
     _fileNames = readToStringList(path);
 
-   _treeModel->updateModel(_fileNames);
-   _tableModel->updateModel(_fileNames);
+   _treeModel->updateCBRNModel(_fileNames);
+   _tableModel->updateCBRNModel(_fileNames);
 
 }
 
