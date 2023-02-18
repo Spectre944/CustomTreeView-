@@ -17,7 +17,6 @@ public:
     virtual int columnCount(const QModelIndex &parent) const;
     virtual QVariant data(const QModelIndex &index, int role) const;
     virtual Qt::ItemFlags flags(const QModelIndex &index) const;
-    //virtual bool setData(const QModelIndex &index, const QVariant &value, int role);
     virtual bool removeRows(int position, int rows, const QModelIndex &index);
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
     virtual void sort(int column, Qt::SortOrder order);
@@ -27,8 +26,8 @@ public:
     using QAbstractTableModel::setHeaderData;
     virtual bool setHeaderData(Qt::Orientation orientation, const QList<QVariant> &value, int role);
 
-    bool insertRowData(int row, const QList<QVariant> &value, const QModelIndex &index);
     void updateCBRNModel(const QList<QString> &data);
+    void clearCBRNModel();
 
 
 private:
@@ -39,7 +38,7 @@ private:
 
 
 protected:
-    //QHash<QModelIndex, QVariant> _cellData;
+
     QList<QVariantList> _cellData;
 
 };
@@ -67,7 +66,6 @@ inline QVariant TableModel::data(const QModelIndex &index, int role) const
     if(!index.isValid())
         return QVariant();
     if(role == Qt::DisplayRole || role == Qt::EditRole){
-        //return _cellData.value(index, QVariant());
         return _cellData.at(index.row()).at(index.column());
     }
     return QVariant();
@@ -81,21 +79,16 @@ inline Qt::ItemFlags TableModel::flags(const QModelIndex &index) const
 
 }
 
-//inline bool TableModel::setData(const QModelIndex &index, const QVariant &value, int role)
 inline bool TableModel::setData(const QModelIndex &index, const QVariantList &value, int role)
 {
     if(!index.isValid())
         return false;
     if(role == Qt::DisplayRole || role == Qt::EditRole){
-        //_cellData.insert(index, value);
-        //_cellData[index.row()][index.column()] = value;
         _cellData.insert(index.row(),value);
         emit dataChanged(index, index);
     }
     return false;
 }
-
-
 
 
 inline void TableModel::updateCBRNModel(const QList<QString> &data)
@@ -108,18 +101,11 @@ inline void TableModel::updateCBRNModel(const QList<QString> &data)
     QString cbrnRow = 0;
     QDateTime FileCreatedTime;
 
-    _cellData.clear();
+    //clear all before update
+    clearCBRNModel();
 
-    //dont build model if empty
-    if(data.isEmpty()){
-        return;
-    }
-
-    //remove all rows before update
-    removeRows(0, rowCount(QModelIndex()),QModelIndex());
-    insertRows(0,data.count(),QModelIndex());
-
-
+    //insert new row depending how much data we have
+    insertRows(0, data.count(),QModelIndex());
 
     while (number < data.count()) {
 
@@ -130,13 +116,6 @@ inline void TableModel::updateCBRNModel(const QList<QString> &data)
 
             //Путь к файлу
             QString fileName = "C:\\CBRN\\Incoming\\" + lineData;
-
-            //Если файла не существует пропуск
-            if(!QFile().exists(fileName)){
-                ++number;
-                continue;
-
-            }
 
             //Открытие, копирование и закрытие файла
             cbrnFile.setFileName(fileName);
@@ -165,6 +144,7 @@ inline void TableModel::updateCBRNModel(const QList<QString> &data)
                 FileCreatedTime.setSecsSinceEpoch( 0 );
             }
 
+            //Записываем дату создания в столбец
             witeData << FileCreatedTime;
 
             //Ищем строки, обрезаем и заполняем, если ничего не найдено в строке ставим NULL
@@ -186,7 +166,6 @@ inline void TableModel::updateCBRNModel(const QList<QString> &data)
 
             setData(index(number,0), witeData, Qt::DisplayRole);
 
-
         }
 
     ++number;
@@ -195,10 +174,28 @@ inline void TableModel::updateCBRNModel(const QList<QString> &data)
 
 }
 
+inline void TableModel::clearCBRNModel()
+{
+    //if model is empty - don`t do anything
+    if(rowCount(QModelIndex()) <= 0)
+        return;
+
+    beginRemoveRows(QModelIndex(), 0, rowCount(QModelIndex()) - 1);
+
+    _cellData.clear();
+    _rowCount = 0;
+
+    endRemoveRows();
+}
+
 inline bool TableModel::insertRows(int row, int count, const QModelIndex &parent)
 {
 
     Q_UNUSED(parent);
+
+    //if model is empty - don`t do anything
+    if(count <= 0)
+        return false;
 
     beginInsertRows(QModelIndex(), row, count - 1);
 
@@ -247,11 +244,9 @@ inline bool TableModel::setHeaderData(Qt::Orientation orientation, const QList<Q
 {
     Q_UNUSED(orientation);
     Q_UNUSED(role);
-    //headerNames.clear();
     headerNames << value;
     return true;
 }
-
 
 inline bool TableModel::removeRows(int position, int rows, const QModelIndex &index)
 {
